@@ -78,7 +78,7 @@ class NumGamesOnSameDayConstraint extends ScheduleConstraint {
 		this._maxGames = maxGames;
 	}
 
-	public abstract eval(gameSlots: GameSlotModel[]) : GameSlotModel[] 
+	public eval(gameSlots: GameSlotModel[]) : GameSlotModel[] 
 	{
 		let badGameSlots: GameSlotModel[] = [];
 		let gamesOnDay = 1;
