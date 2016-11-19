@@ -2,7 +2,7 @@ class TeamModel {
 	private _teamName: string;
 	private _id: number;
 	private _byes: Date[];
-	private _badDaysOfWeek: string[];
+	private _badDayOfWeek: string;
 	private _maxDoubleHeaders: number;
 	private _maxStartHour: number;
 	private _minStartHour: number;
@@ -12,6 +12,8 @@ class TeamModel {
 	constructor(name:string, id:number) {
 		this._teamName = name;
 		this._id = id;
+		this._byes = [];
+		this._preferredFields = [];
 	}
 
 	setChangeCallback(changeCallback: () => void) {
@@ -66,11 +68,11 @@ class TeamModel {
 		this.modelChanged();
 	}
 
-	get badDaysOfWeek(): string[] {
-		return this._badDaysOfWeek;
+	get badDayOfWeek(): string {
+		return this._badDayOfWeek;
 	}
-	set badDaysOfWeek(val: string[]) {
-		this._badDaysOfWeek = val;
+	set badDayOfWeek(val: string) {
+		this._badDayOfWeek = val;
 		this.modelChanged();
 	}
 
@@ -87,7 +89,7 @@ class TeamModel {
 		}
 		var team = new TeamModel(input.teamName, input.id)
 		team._byes = input.byes;
-		team._badDaysOfWeek = input.badDaysOfWeek;
+		team._badDayOfWeek = input.badDayOfWeek;
 		team._maxDoubleHeaders = input.maxDoubleHeaders;
 		team._maxStartHour = input.maxStartHour;
 		team._minStartHour = input.minStartHour;
@@ -100,7 +102,7 @@ class TeamModel {
 		toRet.teamName = this._teamName;
 		toRet.id = this._id;
 		toRet.byes = this._byes;
-		toRet.badDaysOfWeek = this._badDaysOfWeek;
+		toRet.badDayOfWeek = this._badDayOfWeek;
 		toRet.maxDoubleHeaders = this._maxDoubleHeaders;
 		toRet.maxStartHour = this._maxStartHour;
 		toRet.minStartHour = this._minStartHour;

@@ -4,8 +4,8 @@ export class MatchupModel {
 	private _team1: TeamModel;
 	private _team2: TeamModel;
 	constructor(t1: TeamModel, t2: TeamModel) {
-		this.team1 = t1;
-		this.team2 = t2;
+		this._team1 = t1;
+		this._team2 = t2;
 	}
 
 	get team1():TeamModel {

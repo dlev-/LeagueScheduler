@@ -18,7 +18,17 @@ class RootModel {
 		this._leagueName = leagueName;
 		this._daysOfWeek = daysOfWeek;
 		this._year = year;
+		this._schedule = new ScheduleModel();
 	}
+
+	get teams() {
+		return this._teams;
+	}
+
+	get schedule() {
+		return this._schedule;
+	}
+
 
 	addTeam(team: TeamModel) {
 		this._teams.push(team);
