@@ -30,6 +30,14 @@ class GameSlotModel {
 	set matchup(val:MatchupModel){
 		this._matchup = val;
 	}
+
+	public static compare(a: GameSlotModel, b: GameSlotModel): number {
+		let toRet = a._day.getTime() - b._day.getTime();
+		if (toRet == 0) {
+			toRet = a._time - b._time;
+		}
+		return toRet;
+	}
 }
 
 

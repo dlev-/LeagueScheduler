@@ -1,5 +1,6 @@
 import TeamModel from "./teamModel"; 
 import ScheduleModel from "./ScheduleModel"; 
+import FieldModel from "./FieldModel"; 
 
 class RootModel {
 	private static _version: string = "1.0.0";
@@ -11,6 +12,7 @@ class RootModel {
 	private _daysOfWeek: number[]; // where sunday is 0
 	private _year: number;
 	private _schedule: ScheduleModel;
+	private _fields: FieldModel[];
 
 	constructor (discNWId: number, leagueName: string, daysOfWeek: number[], year: number) {
 		this._teams = [];
@@ -19,6 +21,7 @@ class RootModel {
 		this._daysOfWeek = daysOfWeek;
 		this._year = year;
 		this._schedule = new ScheduleModel();
+		this._fields = [];
 	}
 
 	get teams() {
@@ -29,9 +32,16 @@ class RootModel {
 		return this._schedule;
 	}
 
+	get fields() {
+		return this._fields;
+	}
 
 	addTeam(team: TeamModel) {
 		this._teams.push(team);
+	}
+
+	addField(field: FieldModel) {
+		this._fields.push(field);
 	}
 
 	static deserialize(input: any): RootModel {
@@ -62,6 +72,10 @@ class RootModel {
 		for (var ii = 0; ii < input.teams.length; ++ii){
 			newRoot.addTeam(TeamModel.deserialize(input.teams[ii]));
 		}
+
+		for (var ii = 0; ii < input.fields.length; ++ii){
+			newRoot.addField(FieldModel.deserialize(input.fields[ii]));
+		}
 		return newRoot;
 	}
 
@@ -76,6 +90,7 @@ class RootModel {
 		toRet.leagueName = this._leagueName;
 		toRet.daysOfWeek = this._daysOfWeek;
 		toRet.year = this._year;
+		toRet.fields = this._fields;
 
 		return toRet;
 	}

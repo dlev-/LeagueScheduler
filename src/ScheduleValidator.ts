@@ -2,6 +2,7 @@ import RootModel from "./RootModel";
 import ScheduleModel from "./ScheduleModel";
 import GameSlotModel from "./GameSlotModel";
 import TeamModel from "./teamModel";
+import DateUtils from "./DateUtils";
 import * as _ from "underscore"
 
 class ScheduleValidator {
@@ -24,10 +25,6 @@ class ScheduleValidator {
 		return _.uniq(days);	
 	}
 
-	private static niceStringForDate(d:Date) : string{
-		return d.toISOString().slice(0,10);
-	}
-
 	private static getValidDaysOfWeek(days: Date[]): string[] {
 		let daysOfWeek = _.uniq(_.map(days, (d:Date) => {return d.getDay();}));
 		let dayNames = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
@@ -38,7 +35,7 @@ class ScheduleValidator {
 		for (let byeDay of team.byes) {
 			if (!_.contains(days, byeDay)) {
 				return "Team " + team.teamName + " requested bye " + 
-					ScheduleValidator.niceStringForDate(byeDay) + 
+					DateUtils.niceStringForDate(byeDay) + 
 					", but that is not a day when games are scheduled.";
 			}
 		}
