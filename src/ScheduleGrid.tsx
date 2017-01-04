@@ -81,23 +81,24 @@ class ScheduleCell extends React.Component<ScheduleCellProps, {}> {
 interface ScheduleRowProps {
   day: Date;
   time: number;
-  fieldIds: number[];
-  gameSlots: { [fieldId: number] : GameSlotModel;};
+  gameSlots: GameSlotModel[];
   swapMatchups: (gsmId1: string, gsmId2: string) => void;
 }
 
 class ScheduleRow extends React.Component<ScheduleRowProps, {}> {
   render() {
   	let localProps = this.props;
+  	let keyBase = localProps.day.toISOString() + localProps.time;
 	  return (
 		<tr>
-	      <th>{this.props.day.toString().substring(0,11) + " time:" + this.props.time}</th>
+	      <th>{localProps.day.toString().substring(0,11) + " time:" + this.props.time}</th>
 
-  		  {this.props.fieldIds.map(function(fieldId) {
-  		  	let gsm = localProps.gameSlots[fieldId];
+  		  {localProps.gameSlots.map(function(gsm, index) {
+  		  	let key = gsm ? gsm.dayTimeKey + gsm.fieldNum : index.toString(); 
+  		  	key = keyBase + key;
 			  return (
 			    <td>
-			      <ScheduleCell key={fieldId} gsm={gsm} swapMatchups={localProps.swapMatchups} />
+			      <ScheduleCell key={key} gsm={gsm} swapMatchups={localProps.swapMatchups} />
 			    </td>
 			  );
 	      })}
@@ -108,8 +109,7 @@ class ScheduleRow extends React.Component<ScheduleRowProps, {}> {
 
 interface ScheduleGridProps {
   fields: FieldModel[];
-  fieldIds: number[];
-  fieldToGSMaps: { [fieldId: number] : GameSlotModel;}[];
+  fieldGridOfGsms: GameSlotModel[][];
   swapMatchups: (gsmId1: string, gsmId2: string) => void;
 }
 
@@ -121,28 +121,26 @@ class ScheduleGrid extends React.Component<ScheduleGridProps, {}> {
 			<thead>
 			<tr><th/>
 				{localProps.fields.map(function(field) {
-					return <ScheduleFieldHeader fieldName= { field.name } key={field.id}/>;
+					return <ScheduleFieldHeader fieldName= { field.name } key={field.name}/>;
 				}) }
 			</tr>
 			</thead>
 			<tbody>
-			{localProps.fieldToGSMaps.map(function(gameSlots) {
+			{localProps.fieldGridOfGsms.map(function(gameSlotRow) {
 				let gsm : GameSlotModel;
-				for (let ii = 0; ii < localProps.fieldIds.length; ++ii) {
-					gsm = gameSlots[localProps.fieldIds[ii]];
+				for (let ii = 0; ii < gameSlotRow.length; ++ii) {
+					gsm = gameSlotRow[ii];
 					if (gsm) {
 						break;
 					}
 				}
-				console.log(gsm.dayTimeKey);
 
 				return (
 					<ScheduleRow 
 					  day={gsm.day} 
-					  time={gsm.time} 
-					  fieldIds={localProps.fieldIds}
+					  time={gsm.time}
 					  key={gsm.dayTimeKey}
-					  gameSlots={gameSlots}
+					  gameSlots={gameSlotRow}
 					  swapMatchups={localProps.swapMatchups} />
 			    );
 			}) }

@@ -34,7 +34,9 @@ for (let ii = 0; ii < 10; ++ii) {
 }
 
 root.schedule.addGameSlot(new GameSlotModel(baseDate, 12, 20));
+root.schedule.addGameSlot(new GameSlotModel(baseDate, 14, 54));
 
+root.addField(new FieldModel("Mag 5a", 54));
 root.addField(new FieldModel("Mag 6a", 92));
 root.addField(new FieldModel("Mag 6b", 93));
 root.addField(new FieldModel("Mag 7a", 20));

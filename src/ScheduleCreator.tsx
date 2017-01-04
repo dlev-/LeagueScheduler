@@ -9,34 +9,40 @@ class ScheduleCreator {
   private _fields: FieldModel[];
   private _fieldIds: number[];
   private _gameSlots: GameSlotModel[];
-  private _fieldToGSMaps: { [fieldId: number] : GameSlotModel;}[];
+  private _fieldGridOfGsms: GameSlotModel[][];
 
   public constructor(fields: FieldModel[], gameSlots: GameSlotModel[]) {
 	this._fields = fields;
 	this._gameSlots = gameSlots;
 	this._fieldIds = ScheduleCreator.getFieldIds(fields);
-	this._fieldToGSMaps = ScheduleCreator.processGameSlots(gameSlots);
+	this._fieldGridOfGsms = ScheduleCreator.processGameSlotsForGrid(gameSlots, this._fieldIds);
 	this.render();
   }
 
-  private static processGameSlots(gameSlots: GameSlotModel[]): { [fieldId: number] : GameSlotModel;}[] {
-  	var bundles : { [fieldId: number] : GameSlotModel;}[] = [];
+  private static processGameSlotsForGrid(gameSlots: GameSlotModel[], fieldIds: number[]): GameSlotModel[][] {
+  	let fieldIdToIndex : { [fieldId: number] : number;} = {};
+  	for (let ii = 0; ii < fieldIds.length; ++ii) {
+  		fieldIdToIndex[fieldIds[ii]] = ii;
+  	}
 
-  	let currentBundle : { [fieldId: number] : GameSlotModel;} = {};
+  	let grid: GameSlotModel[][]= [];
+
+  	// need to fill with nulls, because array.map skips undefined
+  	let currentRow : GameSlotModel[] = Array.apply(null, new Array(fieldIds.length));
   	let currentGS = gameSlots[0];
-  	currentBundle[currentGS.fieldNum] = currentGS;
+  	currentRow[fieldIdToIndex[currentGS.fieldNum]] = currentGS;
 
   	for (let ii = 1; ii < gameSlots.length; ++ii){
   		let gs = gameSlots[ii];
   		if (gs.dayTimeKey != currentGS.dayTimeKey) {
-  			bundles.push(currentBundle);
-  			currentBundle = {};
+  			grid.push(currentRow);
+  			currentRow = Array.apply(null, new Array(fieldIds.length));
   		}
-		currentBundle[gs.fieldNum] = gs;
+  		currentRow[fieldIdToIndex[gs.fieldNum]] = gs;
 		currentGS = gs;
   	}
-  	bundles.push(currentBundle);
-  	return bundles;
+	grid.push(currentRow);
+  	return grid;
   }
 
   private static getFieldIds(fields: FieldModel[]): number[] {
@@ -52,8 +58,7 @@ class ScheduleCreator {
 	ReactDOM.render(
 		<ScheduleGrid 
 			fields={this._fields} 
-			fieldIds = {this._fieldIds}
-			fieldToGSMaps={this._fieldToGSMaps}
+			fieldGridOfGsms={this._fieldGridOfGsms}
 			swapMatchups = {swapper}/>,
 		document.getElementById("root")
 	);	
