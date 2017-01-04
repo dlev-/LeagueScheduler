@@ -26,23 +26,53 @@ class ScheduleFieldHeader extends React.Component<ScheduleFieldHeaderProps, {}> 
 
 interface ScheduleCellProps {
   gsm: GameSlotModel;
+  swapMatchups: (gsmId1: string, gsmId2: string) => void;
 }
 
 class ScheduleCell extends React.Component<ScheduleCellProps, {}> {
+  dragStart(evt: any) {
+  	evt.dataTransfer.setData("text", this.props.gsm.id);
+  }
+
+  dragOver(evt: any) {
+  	evt.preventDefault();
+  	return true;
+  }
+
+  dragDropped(evt: any) {
+  	let dragSourceGsmId = evt.dataTransfer.getData("text");
+  	let dragTargetGsmId = this.props.gsm.id;
+  	if (dragSourceGsmId != dragTargetGsmId) {
+  		this.props.swapMatchups(dragSourceGsmId, dragTargetGsmId);
+  	}
+  }
+
   render() {
   	let game = this.props.gsm;
   	if (!game) { 
-  		return <div>none</div>;
+  		return <div>-</div>;
   	} else if (!game.matchup){
-		return <div>slot</div>;
+		return <div draggable='true' 
+		            onDragStart={e => this.dragStart(e)} 
+		            onDragOver={e => this.dragOver(e)} 
+		            onDrop={e => this.dragDropped(e)}>slot</div>;
   	} else {
+	 //  return (
+		// <table>
+		// 	<tbody>
+		// 	<tr><td>{game.matchup.team1.teamName}</td></tr>
+		// 	<tr><td>{game.matchup.team2.teamName}</td></tr>
+		// 	</tbody>
+		// </table>	  		
+	 //  );
 	  return (
-		<table>
-			<tbody>
-			<tr><td>{game.matchup.team1.teamName}</td></tr>
-			<tr><td>{game.matchup.team2.teamName}</td></tr>
-			</tbody>
-		</table>	  		
+		<div draggable='true' 
+             onDragStart={e => this.dragStart(e)} 
+             onDragOver={e => this.dragOver(e)} 
+             onDrop={e => this.dragDropped(e)}>
+		  <div>{game.matchup.team1.teamName}</div>
+		  <div>{game.matchup.team2.teamName}</div> 	
+		</div> 	
 	  );
   	}
   }
@@ -52,8 +82,8 @@ interface ScheduleRowProps {
   day: Date;
   time: number;
   fieldIds: number[];
-  key: string;
   gameSlots: { [fieldId: number] : GameSlotModel;};
+  swapMatchups: (gsmId1: string, gsmId2: string) => void;
 }
 
 class ScheduleRow extends React.Component<ScheduleRowProps, {}> {
@@ -65,9 +95,11 @@ class ScheduleRow extends React.Component<ScheduleRowProps, {}> {
 
   		  {this.props.fieldIds.map(function(fieldId) {
   		  	let gsm = localProps.gameSlots[fieldId];
-			  return <td><ScheduleCell 
-		  		key={fieldId}
-		  		gsm={gsm} /></td>;
+			  return (
+			    <td>
+			      <ScheduleCell key={fieldId} gsm={gsm} swapMatchups={localProps.swapMatchups} />
+			    </td>
+			  );
 	      })}
 	    </tr>
 	  )
@@ -76,14 +108,14 @@ class ScheduleRow extends React.Component<ScheduleRowProps, {}> {
 
 interface ScheduleGridProps {
   fields: FieldModel[];
-  gameSlots: GameSlotModel[];
+  fieldIds: number[];
+  fieldToGSMaps: { [fieldId: number] : GameSlotModel;}[];
+  swapMatchups: (gsmId1: string, gsmId2: string) => void;
 }
 
 class ScheduleGrid extends React.Component<ScheduleGridProps, {}> {
   render() {
 	var localProps = this.props;
-	let fieldIds = ScheduleGrid.getFieldIds(localProps.fields);
-	var rows : ScheduleRowProps[] = this.processGameSlots(localProps.gameSlots, fieldIds);
 	return (
 		<table>
 			<thead>
@@ -94,45 +126,29 @@ class ScheduleGrid extends React.Component<ScheduleGridProps, {}> {
 			</tr>
 			</thead>
 			<tbody>
-			{rows.map(function(row) {
-				let key = row.day.toUTCString() + row.time;
-				return React.createElement(ScheduleRow, row);
+			{localProps.fieldToGSMaps.map(function(gameSlots) {
+				let gsm : GameSlotModel;
+				for (let ii = 0; ii < localProps.fieldIds.length; ++ii) {
+					gsm = gameSlots[localProps.fieldIds[ii]];
+					if (gsm) {
+						break;
+					}
+				}
+				console.log(gsm.dayTimeKey);
+
+				return (
+					<ScheduleRow 
+					  day={gsm.day} 
+					  time={gsm.time} 
+					  fieldIds={localProps.fieldIds}
+					  key={gsm.dayTimeKey}
+					  gameSlots={gameSlots}
+					  swapMatchups={localProps.swapMatchups} />
+			    );
 			}) }
 			</tbody>
 		</table>
 	)
-  }
-
-  private processGameSlots(gameSlots: GameSlotModel[], fieldIds: number[]): ScheduleRowProps[] {
-  	var bundles : ScheduleRowProps[] = [];
-
-  	let currentBundle : ScheduleRowProps = ScheduleGrid.createRowProps(gameSlots[0], fieldIds);
-  	currentBundle.gameSlots[gameSlots[0].fieldNum] = gameSlots[0];
-
-  	for (let ii = 1; ii < gameSlots.length; ++ii){
-  		let gs = gameSlots[ii];
-  		if (gs.day != currentBundle.day || gs.time != currentBundle.time) {
-  			bundles.push(currentBundle);
-  			currentBundle = ScheduleGrid.createRowProps(gs, fieldIds);
-  		}
-		currentBundle.gameSlots[gs.fieldNum] = gs;
-  	}
-  	bundles.push(currentBundle);
-  	return bundles;
-  }
-
-  private static createRowProps(gsm: GameSlotModel, fieldIds: number[]): ScheduleRowProps {
-  	let key = gsm.day.toUTCString() + gsm.time;
-  	let toRet : ScheduleRowProps = {time: gsm.time, day: gsm.day, gameSlots: {}, fieldIds: fieldIds, key: key};
-  	return toRet;
-  }
-
-  private static getFieldIds(fields: FieldModel[]): number[] {
-  	let fieldIds: number[] = [];
-  	for (let ii = 0; ii < fields.length; ++ii) {
-  		fieldIds.push(fields[ii].id);
-  	}
-  	return fieldIds
   }
 }
 

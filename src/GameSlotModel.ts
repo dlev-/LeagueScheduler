@@ -1,15 +1,25 @@
 import MatchupModel from "./MatchupModel";
 
 class GameSlotModel {
+	private static _idCounter = 0;
 	private _day: Date;
 	private _time: number;
 	private _fieldNum: number;
 	private _matchup: MatchupModel;
+	private _id: string;
+	private _dayTimeKey: string;
 
 	constructor(day: Date, time: number, fieldNum: number) {
 		this._day = day;
 		this._time = time;
 		this._fieldNum = fieldNum;
+		this._id = (GameSlotModel._idCounter++).toString();
+		this._dayTimeKey = this.day.getUTCFullYear() + "-" + (this.day.getUTCMonth() + 1) + "-" + this.day.getUTCDate() + ":" + this.time.toString();
+		this._dayTimeKey = this.day.toUTCString() + this.time.toString();
+	}
+
+	get id():string {
+		return this._id;
 	}
 
 	get day():Date {
@@ -22,6 +32,10 @@ class GameSlotModel {
 
 	get fieldNum():number {
 		return this._fieldNum;
+	}
+
+	get dayTimeKey():string {
+		return this._dayTimeKey;
 	}
 
 	get matchup():MatchupModel {

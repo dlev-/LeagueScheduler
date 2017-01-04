@@ -3,9 +3,11 @@ import * as ReactDOM from "react-dom";
 import MatchupCreator from "./MatchupCreator";
 import TeamManager from "./teamManager";
 import ScheduleGrid from "./ScheduleGrid";
+import ScheduleCreator from "./ScheduleCreator";
 import RootModel from "./RootModel";
 import TeamModel from "./teamModel";
 import FieldModel from "./FieldModel";
+import MatchupModel from "./MatchupModel";
 import GameSlotModel from "./GameSlotModel";
 
 import ScheduleValidator from "./ScheduleValidator";
@@ -31,8 +33,14 @@ for (let ii = 0; ii < 10; ++ii) {
 	root.schedule.addGameSlot(new GameSlotModel(gameDate, 12, 93));
 }
 
+root.schedule.addGameSlot(new GameSlotModel(baseDate, 12, 20));
+
 root.addField(new FieldModel("Mag 6a", 92));
 root.addField(new FieldModel("Mag 6b", 93));
+root.addField(new FieldModel("Mag 7a", 20));
+
+// add matchups
+root.schedule.gameSlots[0].matchup = new MatchupModel(root.teams[0], root.teams[1]);
 
 var serializedModel = JSON.stringify(root.serialize());
 var newRoot = RootModel.deserialize(JSON.parse(serializedModel));
@@ -57,24 +65,28 @@ ScheduleValidator.validateByes(root);
 //var matchupCreator = new MatchupCreator(teamListHardCoded);
 
 
-interface AppProps {
-	root: RootModel;
-}
+// interface AppProps {
+// 	root: RootModel;
+// }
 
-class App extends React.Component<AppProps, {}> {
+// class App extends React.Component<AppProps, {}> {
 
-	render() {
+// 	render() {
 
-		return (
-			<div> 
-				<div> 
-					<ScheduleGrid gameSlots={root.schedule.gameSlots} fields={root.fields} />
-				</div>
-			</div>
-		)
-	}
-}
+// 		return (
+// 			<div> 
+// 				<div> 
+// 					<ScheduleGrid gameSlots={root.schedule.gameSlots} fields={root.fields} />
+// 				</div>
+// 			</div>
+// 		)
+// 	}
+// }
 
 root.schedule.sortGameSlots();
-var rootElement = React.createElement(App, {'root': root})
-ReactDOM.render(rootElement, document.getElementById('root'))
+// var rootElement = React.createElement(App, {'root': root})
+// ReactDOM.render(rootElement, document.getElementById('root'))
+
+var scheduleCreator = new ScheduleCreator(root.fields, root.schedule.gameSlots);
+
+
