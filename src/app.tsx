@@ -67,28 +67,69 @@ ScheduleValidator.validateByes(root);
 //var matchupCreator = new MatchupCreator(teamListHardCoded);
 
 
-// interface AppProps {
-// 	root: RootModel;
-// }
+class App {
 
-// class App extends React.Component<AppProps, {}> {
 
-// 	render() {
+}
 
-// 		return (
-// 			<div> 
-// 				<div> 
-// 					<ScheduleGrid gameSlots={root.schedule.gameSlots} fields={root.fields} />
-// 				</div>
-// 			</div>
-// 		)
-// 	}
-// }
+
+interface PageProps {
+	root: RootModel;
+	activeTab: string;
+}
+
+interface PageState {
+	activeTab: string;
+}
+
+class Page extends React.Component<PageProps, PageState> {
+
+	render() {
+
+		return (
+			<div> 
+				<div> 
+					<button onClick={this.tabSwitchHandler}>Create League</button>
+					<button onClick={this.tabSwitchHandler}>Add Team Details</button>
+					<button onClick={this.tabSwitchHandler}>Create Matchups</button>
+					<button onClick={this.tabSwitchHandler}>Create Schedule</button>
+				</div>
+				<hr/>
+				<div> 
+					{this.renderContent()}
+				</div>
+			</div>
+		)
+	}
+
+	getInitialState() {
+	  return {
+		activeTab: this.props.activeTab
+	  };
+	}
+
+	private renderContent() {
+		let active = this.state ? this.state.activeTab : this.props.activeTab;
+		if (active == "Ceate League") {
+			return (<div>Ceate League content</div>);
+		} else if (active == "Add Team Details") {
+			return (<div>Add team content</div>);
+		}
+		//<ScheduleGrid gameSlots={root.schedule.gameSlots} fields={root.fields} />
+	}
+
+	private tabSwitchHandler = (e: any) => {
+		this.setState({activeTab: e.target.textContent});
+		e.preventDefault();
+	}
+}
 
 root.schedule.sortGameSlots();
 // var rootElement = React.createElement(App, {'root': root})
 // ReactDOM.render(rootElement, document.getElementById('root'))
 
-var scheduleCreator = new ScheduleCreator(root.fields, root.schedule.gameSlots);
+ReactDOM.render(<Page root={root} activeTab={"Ceate League"} />, document.getElementById("root"));
+
+//var scheduleCreator = new ScheduleCreator(root.fields, root.schedule.gameSlots);
 
 
