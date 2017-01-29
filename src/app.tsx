@@ -31,10 +31,10 @@ for (let ii = 0; ii < 10; ++ii) {
 	root.schedule.addGameSlot(new GameSlotModel(gameDate, 12, 92));
 	root.schedule.addGameSlot(new GameSlotModel(gameDate, 10, 93));
 	root.schedule.addGameSlot(new GameSlotModel(gameDate, 12, 93));
+	root.schedule.addGameSlot(new GameSlotModel(gameDate, 14, 54));
 }
 
 root.schedule.addGameSlot(new GameSlotModel(baseDate, 12, 20));
-root.schedule.addGameSlot(new GameSlotModel(baseDate, 14, 54));
 
 root.addField(new FieldModel("Mag 5a", 54));
 root.addField(new FieldModel("Mag 6a", 92));
@@ -42,7 +42,16 @@ root.addField(new FieldModel("Mag 6b", 93));
 root.addField(new FieldModel("Mag 7a", 20));
 
 // add matchups
-root.schedule.gameSlots[0].matchup = new MatchupModel(root.teams[0], root.teams[1]);
+//root.schedule.gameSlots[0].matchup = new MatchupModel(root.teams[0], root.teams[1]);
+var matchupCreator = new MatchupCreator(root.teams, 2);
+let matchups = matchupCreator.getMatchups();
+if (matchups.length > root.schedule.gameSlots.length) {
+	throw "more matchups than slots!";
+}
+for (let ii = 0; ii < matchups.length; ++ii) {
+	root.schedule.gameSlots[ii].matchup = matchups[ii];
+}
+
 
 var serializedModel = JSON.stringify(root.serialize());
 var newRoot = RootModel.deserialize(JSON.parse(serializedModel));
@@ -128,8 +137,8 @@ root.schedule.sortGameSlots();
 // var rootElement = React.createElement(App, {'root': root})
 // ReactDOM.render(rootElement, document.getElementById('root'))
 
-ReactDOM.render(<Page root={root} activeTab={"Ceate League"} />, document.getElementById("root"));
+//ReactDOM.render(<Page root={root} activeTab={"Ceate League"} />, document.getElementById("root"));
 
-//var scheduleCreator = new ScheduleCreator(root.fields, root.schedule.gameSlots);
+var scheduleCreator = new ScheduleCreator(root.fields, root.schedule.gameSlots);
 
 

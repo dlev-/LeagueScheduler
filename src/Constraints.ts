@@ -53,7 +53,7 @@ class NonConsecutiveGameConstraint extends ScheduleConstraint {
 			{
 				let timeBetweenGames = Math.abs(gsm.time - lastGsm.time);
 				if (timeBetweenGames > NonConsecutiveGameConstraint.S_GAME_HOUR_DURATION ||
-					NonConsecutiveGameConstraint.s_fieldNeighborResolver.areNeighbors(gsm.fieldNum, lastGsm.fieldNum))
+					!NonConsecutiveGameConstraint.s_fieldNeighborResolver.areNeighbors(gsm.fieldNum, lastGsm.fieldNum))
 				{
 					badGameSlots.push(gsm);
 				}

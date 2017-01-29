@@ -1,54 +1,70 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import MatchupGrid from "./MatchupGrid";
+import MatchupModel from "./MatchupModel";
+import TeamModel from "./TeamModel";
 
 class MatchupCreator {
-	teams: string[];
-	teamGridModel: number[][] = [];
+	private _numGamesPerTeam: number;
+	private _teams: TeamModel[];
+	private _teamGridModel: number[][] = [];
 
-	public constructor(teams: string[]) {
-		this.teams = teams;
+	public constructor(teams: TeamModel[], numGamesPerTeam: number) {
+		this._numGamesPerTeam = numGamesPerTeam;
+		this._teams = teams;
 		this.initMatchups();
-		this.render();
+	}
+
+	public getMatchups(): MatchupModel[] {
+		var matchups: MatchupModel[] = [];
+		for (var ii = 0; ii < this._teams.length; ii++) {
+			for (var jj = ii + 1; jj < this._teams.length; ++jj) {
+				for (var gg = 0; gg < this._teamGridModel[ii][jj]; ++gg)
+				{
+					matchups.push(new MatchupModel(this._teams[ii], this._teams[jj]));
+				}
+			}
+		}		
+		return matchups;
 	}
 
 	private initMatchups() {
-		var numGamesPerTeam = 6;
-		for (var ii = 0; ii < this.teams.length; ii++) {
-			this.teamGridModel[ii] = [];
-			for (var jj = 0; jj < this.teams.length; ++jj) {
-				this.teamGridModel[ii][jj] = jj <= ii ? -1 : 0;
+		for (var ii = 0; ii < this._teams.length; ii++) {
+			this._teamGridModel[ii] = [];
+			for (var jj = 0; jj < this._teams.length; ++jj) {
+				this._teamGridModel[ii][jj] = jj <= ii ? -1 : 0;
 			}
 		}
-		var gamesPerRow = Math.floor(numGamesPerTeam / 2);
-		for (var ii = 0; ii < this.teams.length; ii++) {
-			for (var jj = ii + 1; jj < this.teams.length && jj - ii <= gamesPerRow; ++jj) {
-				this.teamGridModel[ii][jj] += 1;
+		var gamesPerRow = Math.floor(this._numGamesPerTeam / 2);
+		for (var ii = 0; ii < this._teams.length; ii++) {
+			for (var jj = ii + 1; jj < this._teams.length && jj - ii <= gamesPerRow; ++jj) {
+				this._teamGridModel[ii][jj] += 1;
 			}
 		}
 		// give the top and bottom teams a rematch
 		this.initMatchupHelperDoubleEnds(0, 1, 2, gamesPerRow);
-		var len = this.teams.length;
+		var len = this._teams.length;
 		this.initMatchupHelperDoubleEnds(len - 2, len - 1, -2, gamesPerRow);
 	}
 	private initMatchupHelperDoubleEnds(row: number, col: number, inc: number, gamesPerRow:number) {
 		for (var ii = 0; ii < gamesPerRow; ++ii) {
-			this.teamGridModel[row][col]++;
+			this._teamGridModel[row][col]++;
 			row += inc;
 			col += inc;
 		}
 	}
 
-	private render() {
+	public render() {
+		var teamNames = _.map(this._teams, (t:TeamModel) => t.teamName);
 		ReactDOM.render(
 			//<Hello name="Willson" />,
-			<MatchupGrid teamNames={this.teams} gridValues={this.teamGridModel} updateCallback={this.updateMatchup}/>,
+			<MatchupGrid teamNames={teamNames} gridValues={this._teamGridModel} updateCallback={this.updateMatchup}/>,
 			document.getElementById("root")
 		);	
 	}
 
 	private updateMatchup = (x: number, y: number, numMatchups: number) => {
-		this.teamGridModel[x][y] = numMatchups;
+		this._teamGridModel[x][y] = numMatchups;
 		this.render();
 	}
 }
